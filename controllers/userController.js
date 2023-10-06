@@ -1,20 +1,34 @@
 import { userModel } from '../models/userModel.js'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 //Register new User
 
 export const registerUser = async (req, res) => {
     try {
         const { firstName, lastName, email, username, password, image, phone, isAdmin } = req.body
+
+        
+        
+
         if(!firstName || !email || !username || !password || !phone){
             return res.status(400).json({message : "Please provide required information"})
         }
+        const existingUser = await userModel.findOne({email})
+
+        //check if user already exsits
+        if(existingUser){
+          return res.status(400).json({message: "This email is already associated with another user"})
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10)
 
         const user = new userModel(
             {
                 firstName,
                 lastName,
                 username,
-                password,
+                password: hashedPassword,
                 phone,
                 email,
                 image,
@@ -22,15 +36,43 @@ export const registerUser = async (req, res) => {
             }
         ) 
 
-        res.status(200).json({message: "User registered Successfully"})
+        
         await user.save()
-
+        res.status(200).json({message: "User registered Successfully"})
         
         
     } catch (error) {
         res.status(404).json({message: error.message})
         
     }
+}
+
+//login controller 
+export const login = async (req, res) =>{
+  try {
+    const { email, password } = req.body
+    //find user by email  id
+    let user = await userModel.findOne({email})
+    
+    //check if user exists
+    if(!user){
+      throw new Error("Email or Password incorrect")
+    }
+    //compare passwords
+    const matchPassword = await bcrypt.compare(password, user.password)
+    //
+    if(!matchPassword){
+      return res.status(400).json('Invalid Email and/or Password')
+    }
+
+    //create JWT token
+
+    const token = jwt.sign({userId: user._id, email : user.email}, process.env.JWT_SECRET, {expiresIn: '1h'})
+    res.status(200).json({message: 'Login successful', token})
+  } catch (error) {
+    res.status(500).json({message: 'Login failed', error: error.message})
+  }
+  
 }
 
 //Get all user's data
@@ -130,3 +172,4 @@ export const searchUserByUniqueFields = async (req, res) => {
     }
   };
   
+
