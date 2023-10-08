@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCart, addItemToCart, removeItemFromCart, getCart } from '../controllers/cartController.js';
+import { createCart, addItemToCart } from '../controllers/cartController.js';
 
 const route = express.Router();
 
@@ -7,12 +7,7 @@ const route = express.Router();
 route.post('/create-cart', createCart);
 
 // Add an item to the user's cart
-route.post('/add-item', addItemToCart);
+route.put('/add-item/:userId/:productId', addItemToCart);
 
-// Remove an item from the user's cart
-route.delete('/remove-item/:userId/:itemId', removeItemFromCart);
-
-// Get the user's cart
-route.get('/get-cart/:userId', getCart);
 
 export default route;
