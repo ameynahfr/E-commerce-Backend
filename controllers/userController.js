@@ -8,9 +8,6 @@ export const registerUser = async (req, res) => {
     try {
         const { firstName, lastName, email, username, password, image, phone, isAdmin } = req.body
 
-        
-        
-
         if(!firstName || !email || !username || !password || !phone){
             return res.status(400).json({message : "Please provide required information"})
         }
