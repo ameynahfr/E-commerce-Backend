@@ -6,10 +6,13 @@ import bcrypt from 'bcrypt'
 
 export const registerUser = async (req, res) => {
     try {
-        const { firstName, lastName, email, username, password, image, phone, isAdmin } = req.body
+        const { firstName, lastName, email, username, password, confirmPassword, image, phone, isAdmin } = req.body
 
-        if(!firstName || !email || !username || !password || !phone){
+        if(!firstName || !email || !username || !password || !confirmPassword || !phone){
             return res.status(400).json({message : "Please provide required information"})
+        }
+        if(password!==confirmPassword){
+          res.status(400).json({message: "Passwords do not match"})
         }
         const existingUser = await userModel.findOne({email})
 
@@ -88,6 +91,46 @@ export const getAllUsersData =  async (req,res)=>{
 
 
 }
+
+//Change password
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "Please provide all the required fields" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    // Check if the provided current password matches the user's current password
+    const id = req.params.id
+    const user = await userModel.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(403).json({ message: "Incorrect Current Password" });
+    }
+
+    // Update the user's password with the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 //Search user by email, username
 

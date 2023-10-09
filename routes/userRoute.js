@@ -1,6 +1,6 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
-import { getAllUsersData, registerUser, searchUserByUniqueFields, updateUser, deleteUser, login } from '../controllers/userController.js'
+import { getAllUsersData, registerUser, searchUserByUniqueFields, updateUser, deleteUser, login, changePassword } from '../controllers/userController.js'
 
 const route = express.Router()
 
@@ -25,6 +25,7 @@ const middleware = async (req, res, next) => {
 
 route.post('/register-user', registerUser)
 route.get('/login', login)
+route.post('/change-password/:id', changePassword)
 route.get('/all-users', middleware, getAllUsersData)
 route.get('/search-user/:param', searchUserByUniqueFields)
 route.put('/update-user/:id', updateUser)
