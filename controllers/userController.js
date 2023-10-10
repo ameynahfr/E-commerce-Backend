@@ -127,7 +127,7 @@ export const changePassword = async (req, res) => {
     res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -163,7 +163,7 @@ export const searchUserByUniqueFields = async (req, res) => {
       }
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ message: error.message });
     }
   };
 
