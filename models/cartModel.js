@@ -1,24 +1,39 @@
 import mongoose from "mongoose";
 
 const cartSchema = new mongoose.Schema({
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'userModel', // Reference to the User model
+      ref: 'userModel', 
       required: true,
     },
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'productModel', // Reference to the Product model
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true
+
+    items : [//User.find().skip((page-1)*pageSize).limit(pageSize)
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'productModel', 
+          required: true,
+        },
+
+        quantity: {
+          type: Number,
+          default : 1
+        },
+
+        pricePerUnit: {
+          type: Number
+        },
+
+        totalPrice: {
+          type: Number
+        }
+      }
+    ],
+
+    totalCartPrice : {
+      type: Number
     }
+    
   });
 
 

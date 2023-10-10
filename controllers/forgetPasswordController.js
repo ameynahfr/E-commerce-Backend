@@ -67,7 +67,8 @@ export const forgetPassword = async (req, res) => {
             // update its OTP instead of creating a new one
             existingRecord.otp = cryptoOTP;
             await existingRecord.save();
-        } else {
+        } 
+        if(!existingRecord) {
             // If no existing record is found, create a new forgetPasswordModel
             const password = new forgetPasswordModel({
                 email,
@@ -89,6 +90,13 @@ export const verifyOtp = async (req, res, next) => {
         const forgetPass = await forgetPasswordModel.findOne({ email });
 
         if (forgetPass && otp === forgetPass.otp) {
+            // Check if 1 hour has passed
+            const currentTimestamp = new Date();
+            const expirationTime = 3600 * 1000; 
+
+            if (currentTimestamp - forgetPass.timestamp > expirationTime) {
+                return res.status(400).json({ message: "OTP has expired" });
+            }
             return next();
         } else {
             // OTP is incorrect or email not found.
@@ -100,12 +108,14 @@ export const verifyOtp = async (req, res, next) => {
 };
 
 
+
 export const resetPassword = async (req, res) => {
     try {
         const { email, newPassword, confirmPassword } = req.body;
         let user = await userModel.findOne({ email });
 
         if (newPassword === confirmPassword) {
+            //convert new password to hashed password
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
             user.password = hashedNewPassword;
             await user.save();

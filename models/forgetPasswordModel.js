@@ -9,6 +9,11 @@ const forgetPasswordSchema = new mongoose.Schema({
 
     otp : {
         type : String
+    },
+
+    timestamp: {
+        type: Date,
+        default: Date.now, // Set the default value to the current timestamp
     }
 })
 
