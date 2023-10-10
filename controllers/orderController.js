@@ -70,27 +70,6 @@ export const getAllOrdersBySingleUser = async (req, res) => {
     }
 }
 
-// Get all orders by all users (Admin)
-export const getAllOrders = async (req, res)=>{
-    try {
-        const orders = await orderModel.find()
-        .populate({
-            path: "user",
-            model: "userModel"
-        })
-        .populate({
-            path: "cart",
-            model: "cartModel"
-        });
-        if(!orders){
-            res.status(400).json({message: "No orders created yet"})
-        }
-        res.status(200).json(orders)
-    } catch (error) {
-        res.status(404).json({message: error.message})
-    }
-}
-
 //get single user order
 
 export const getSingleOrder = async (req, res) => {
@@ -119,6 +98,44 @@ export const getSingleOrder = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };
+
+// Get all orders by all users (Admin)
+export const getAllOrders = async (req, res) => {
+    try {
+      // converting query parameters to numbers
+      const page = parseInt(req.query.page);
+      const pageSize = parseInt(req.query.pageSize);
+  
+      // Check if the extracted values are valid numbers
+      if (isNaN(page) || isNaN(pageSize)) {
+        return res.status(400).json({ message: "Invalid page or pageSize parameter" });
+      }
+  
+      // Calculating skip and limit values for pagination
+      const skip = (page - 1) * pageSize;
+  
+      const orders = await orderModel.find()
+        .skip(skip)
+        .limit(pageSize)
+        .populate({
+          path: "user",
+          model: "userModel"
+        })
+        .populate({
+          path: "cart",
+          model: "cartModel"
+        });
+  
+      if (!orders || orders.length === 0) {
+        return res.status(404).json({ message: "No orders found" });
+      }
+  
+      res.status(200).json(orders);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  
 
 //Cancel order
 export const cancelOrder = async (req, res) => {
