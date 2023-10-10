@@ -13,7 +13,7 @@ export const forgetPassword = async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'aminah.sheikhere@gmail.com',
+                user: process.env.EMAIL,
                 pass: 'pjpc zfut hxdz bngh'
             }
         });
@@ -21,7 +21,7 @@ export const forgetPassword = async (req, res) => {
         const cryptoOTP = crypto.randomBytes(4).toString('hex');
 
         const mailOptions = {
-            from: 'aminah.sheikhere@gmail.com',
+            from: process.env.EMAIL,
             to: email,
             subject: 'Verify your account!',
             html: `
@@ -92,7 +92,7 @@ export const verifyOtp = async (req, res, next) => {
         if (forgetPass && otp === forgetPass.otp) {
             // Check if 1 hour has passed
             const currentTimestamp = new Date();
-            const expirationTime = 3600 * 1000; 
+            const expirationTime = 24 * 60 * 60 * 1000;
 
             if (currentTimestamp - forgetPass.timestamp > expirationTime) {
                 return res.status(400).json({ message: "OTP has expired" });
