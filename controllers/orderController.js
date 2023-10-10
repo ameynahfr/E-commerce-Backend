@@ -1,30 +1,87 @@
 import { orderModel } from "../models/orderModel.js";
+import { userModel } from "../models/userModel.js"
+import { cartModel } from "../models/cartModel.js"
 
 
 //Create order
 export const createOrder = async (req, res) => {
     try {
+        const { userId, cartId } = req.params;
+        const { shippingAddress, paymentMethod } = req.body;
+        
+        // Find the user and cart by _id
+        const findUser = await userModel.findOne({ _id: userId });
+        const findCart = await cartModel.findOne({ _id: cartId });
 
-        const { user, items, price, status, shippingAddress, paymentInfo, createdAt } = req.body
+        if (!findUser || !findCart) {
+            return res.status(404).json({ message: 'User or cart not found' });
+        }
+
+        let checkoutPrice = findCart.totalCartPrice;
+        
         const order = new orderModel({
-            user, 
-            items, 
-            price, 
-            status, 
+            user: findUser._id,
+            cart: findCart._id,
+            checkoutPrice,
             shippingAddress,
-            createdAt
-        })
-        await order.save()
-        res.status(200).json({message: "Order created successfully"})
+            paymentMethod,
+        });
+
+        await order.save();
+        res.status(200).json({ message: 'Order created successfully' });
 
     } catch (error) {
-        res.status(404).json({message: error.message})
+        res.status(500).json({ message: error.message });
     }
 }
 
+
+//Checkout
+export const checkOut = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+// Get all orders by a single user
+export const getAllOrdersBySingleUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const orders = await orderModel.find({ user: userId })
+            .populate({
+                path: "user",
+                model: "userModel"
+            })
+            .populate({
+                path: "cart",
+                model: "cartModel"
+            });
+
+        if (!orders || orders.length === 0) {
+            return res.status(400).json({ message: "No orders created yet" });
+        }
+
+        res.status(200).json(orders);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// Get all orders by all users (Admin)
 export const getAllOrders = async (req, res)=>{
     try {
         const orders = await orderModel.find()
+        .populate({
+            path: "user",
+            model: "userModel"
+        })
+        .populate({
+            path: "cart",
+            model: "cartModel"
+        });
         if(!orders){
             res.status(400).json({message: "No orders created yet"})
         }
@@ -34,14 +91,43 @@ export const getAllOrders = async (req, res)=>{
     }
 }
 
+//get single user order
+
+export const getSingleOrder = async (req, res) => {
+    try {
+      const { orderId } = req.params;
+  
+      // Find the order by its ID
+      const order = await orderModel.findById(orderId)
+        .populate({
+          path: 'user',
+          model: 'userModel'
+        })
+        .populate({
+          path: 'cart',
+          model: 'cartModel'
+        });
+  
+      // Check if the order exists
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+  
+      // Return the order as a JSON response
+      res.status(200).json(order);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 //Cancel order
 export const cancelOrder = async (req, res) => {
     try {
-      const orderId = req.params.id; // Assuming 'id' is the field in req.body that contains the order ID
+      const { orderId } = req.params // Assuming 'id' is the field in req.body that contains the order ID
   
       // Use await to execute the query and retrieve the order document
       const order = await orderModel.findById(orderId);
+     
   
       if (!order) {
         return res.status(400).json({ message: "Order doesn't exist" });
