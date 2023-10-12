@@ -18,6 +18,8 @@ const userSchema = new mongoose.Schema({
 
     password : {
         type : String,
+        minLength : 6,
+        maxLength : 20,
         required : true
     },
 
@@ -28,6 +30,7 @@ const userSchema = new mongoose.Schema({
 
     email : {
         type : String,
+        lowercase : true,
         required : true
     },
 
