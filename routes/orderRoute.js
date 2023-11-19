@@ -1,14 +1,38 @@
-import express from 'express'
-import { createOrder, cancelOrder, getAllOrders, getSingleOrder, getAllOrdersBySingleUser } from "../controllers/orderController.js";
+// orderRoutes.js
 
-const route = express.Router()
+import express from "express";
+import {
+  newOrder,
+  getSingleOrder,
+  myOrders,
+  getAllOrders,
+  updateOrder,
+  deleteOrder,
+} from "../controllers/orderController.js";
+import { isAuthenticatedUser, authorizeRoles } from "../middlewares/auth.js";
 
-route.post('/create-order/:userId/:cartId', createOrder)
+const route = express.Router();
 
-route.get('/all-orders/:userId', getAllOrdersBySingleUser)
-route.get('/single-order/:orderId', getSingleOrder)
-route.get('/all-orders', getAllOrders)
+route.post("/new", isAuthenticatedUser, newOrder);
+route.get("/single-order/:id", isAuthenticatedUser, getSingleOrder);
+route.get("/my-orders", isAuthenticatedUser, myOrders);
+route.get(
+  "/admin/all-orders",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  getAllOrders
+);
+route.put(
+  "/admin/order/:id",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  updateOrder
+);
+route.delete(
+  "/admin/order/:id",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  deleteOrder
+);
 
-route.delete('/cancel-order/:orderId', cancelOrder)
-
-export default route
+export default route;

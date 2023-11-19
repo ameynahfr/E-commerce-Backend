@@ -1,50 +1,103 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-    user : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'userModel',
-        required: true
-    },
-
-    cart : {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'cartModel',
-      required: true
-    },
-
-    checkoutPrice: {
-      type: Number
-    },
-
-    shippingAddress: {
-      street: String,
-      city: String,
-      state: String,
-      postal_code: String,
-      country: String,
-    },
-
-    paymentMethod: {
-      type: String
-    },
-
-    orderStatus: {
+  shippingInfo: {
+    address: {
       type: String,
-      enum: ['pending', 'shipped', 'delivered'],
-      default: 'pending',
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
     },
 
-    createdAt: {
-      type: Date,
-      default: Date.now
+    state: {
+      type: String,
+      required: true,
     },
 
-    isCancelled: {
-      type: Boolean,
-      default: false
-    }
-})
+    country: {
+      type: String,
+      required: true,
+    },
+    pinCode: {
+      type: Number,
+      required: true,
+    },
+    phoneNo: {
+      type: Number,
+      required: true,
+    },
+  },
+  orderItems: [
+    {
+      title: {
+        type: String,
+        required: true,
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+      },
+      image: {
+        type: String,
+        required: true,
+      },
+      product: {
+        type: mongoose.Schema.ObjectId,
+        ref: "productModel",
+        required: true,
+      },
+    },
+  ],
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "userModel",
+    required: true,
+  },
+  paymentInfo: {
+    id: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      required: true,
+    },
+  },
+  paidAt: {
+    type: Date,
+    required: true,
+  },
+  itemsPrice: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  shippingPrice: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  orderStatus: {
+    type: String,
+    required: true,
+    default: "Processing",
+  },
+  deliveredAt: Date,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-
-export const orderModel = mongoose.model('orderModel', orderSchema)
+export const orderModel = mongoose.model("orderModel", orderSchema);

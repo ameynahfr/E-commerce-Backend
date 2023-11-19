@@ -1,36 +1,52 @@
-import express from 'express'
-import jwt from 'jsonwebtoken'
-import { getAllUsersData, registerUser, searchUserByUniqueFields, updateUser, deleteUser, login, changePassword } from '../controllers/userController.js'
+import express from "express";
 
-const route = express.Router()
+import {
+  getAllUsersData,
+  registerUser,
+  updateUser,
+  deleteUser,
+  login,
+  changePassword,
+  logout,
+  getUserDetails,
+  getSingleUser,
+} from "../controllers/userController.js";
+import { authorizeRoles, isAuthenticatedUser } from "../middlewares/auth.js";
+import { tokenVerify } from "../middlewares/tokenVerify.js";
 
-//middleware
+const route = express.Router();
+//Register
+route.post("/user/register-user", registerUser);
+//Login
+route.post("/user/login", login);
+//Update Password
+route.put("/user/update-password", isAuthenticatedUser, changePassword);
+//Update user data
+route.put("/user/update-user", isAuthenticatedUser, updateUser);
+//Get all users ---Admin
+route.get(
+  "/admin/all-users",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  getAllUsersData
+);
+//Get single user data ---Admin
+route.get(
+  "/admin/single-user/:id",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  getSingleUser
+);
+//Update user data
+route.get("/user/me", isAuthenticatedUser, getUserDetails);
+//Delete user data ---Admin
+route.delete(
+  "/admin/delete-user/:id",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  deleteUser
+);
+//Logout
+route.get("/user/logout", logout);
 
-const middleware = async (req, res, next) => {
-    let token;
-    let authHead = req.headers.authorization;
-    if (!authHead) {
-        return res.status(401).json({ message: "Authorization header is missing" });
-    }
-    token = authHead.split(" ")[1];
-    jwt.verify(token, process.env.JWT_SECRET, (error) => {
-        if (error) {
-            res.status(400).json({ message: error.message });
-        }
-        console.log("Token successfully verified");
-        next();
-    });
-}
-
-
-route.post('/register-user', registerUser)
-route.get('/login', login)
-route.post('/change-password/:id', changePassword)
-route.get('/all-users', middleware, getAllUsersData)
-route.get('/search-user/:param', searchUserByUniqueFields)
-route.put('/update-user/:id', updateUser)
-route.delete('/delete-user/:id', deleteUser)
-
-
-
-export default route
+export default route;
