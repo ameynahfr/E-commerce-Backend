@@ -46,7 +46,7 @@ export const registerProduct = async (req, res) => {
 
 export const getAllProductsData = async (req, res) => {
   try {
-    const productsPerPage = 5;
+    const productsPerPage = 8;
     const productCount = await productModel.countDocuments();
     const apiFeature = new ApiFeatures(productModel.find(), req.query)
       .search()

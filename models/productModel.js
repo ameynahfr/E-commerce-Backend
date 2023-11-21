@@ -1,4 +1,12 @@
+import express from "express";
 import mongoose from "mongoose";
+import multer from "multer";
+
+const router = express.Router();
+
+// Multer setup for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const productSchema = new mongoose.Schema({
   title: {
@@ -29,7 +37,6 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
-
       url: {
         type: String,
         required: true,
